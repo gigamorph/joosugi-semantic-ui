@@ -1,0 +1,23 @@
+[
+  {
+    "@id": "http://example.org/layer/transcription",
+    "@type": "sc:layer",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "label": "Transcription",
+    "motivation": "oa:commenting"
+  },
+  {
+    "@id": "http://example.org/layer/translation",
+    "@type": "sc:layer",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "label": "Translation",
+    "motivation": "oa:commenting"
+  },
+  {
+    "@id": "http://example.org/layer/commentary",
+    "@type": "sc:layer",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "label": "Commentary",
+    "motivation": "oa:commenting"
+  }
+]

@@ -1,0 +1,64 @@
+[
+  {
+    "@id": "http://example.org/annotation/tc01",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "oa:Annotation",
+    "motivation": ["oa:commenting"],
+    "resource": [{
+        "@type": "dctypes:Text",
+        "format": "text/html",
+        "chars": "<p>Transcription 1</p>"
+    }],
+    "on": {
+      "@type": "oa:SpecificResource",
+      "full": "http://example.org/canvas/01/01",
+      "selector": {
+          "@type": "oa:SvgSelector",
+          "value": ""
+      }
+    },
+    "layer": [
+      "http://example.org/layer/transcription"
+    ]
+  },
+  {
+    "@id": "http://example.org/annotation/tc2",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "oa:Annotation",
+    "motivation": ["oa:commenting"],
+    "resource": [{
+        "@type": "dctypes:Text",
+        "format": "text/html",
+        "chars": "<p>Transcription 2</p>"
+    }],
+    "on": {
+      "@type": "oa:SpecificResource",
+      "full": "http://example.org/canvas/01/01",
+      "selector": {
+          "@type": "oa:SvgSelector",
+          "value": ""
+      }
+    },
+    "layer": [
+      "http://example.org/layer/transcription"
+    ]
+  },
+  {
+    "@id": "http://example.org/annotation/tr1",
+    "@context": "http://iiif.io/api/presentation/2/context.json",
+    "@type": "oa:Annotation",
+    "motivation": ["oa:commenting"],
+    "resource": [{
+        "@type": "dctypes:Text",
+        "format": "text/html",
+        "chars": "<p>Translation 1</p>"
+    }],
+    "on": {
+      "@type": "oa:Annotation",
+      "full": "http://example.org/annotation/tc2"
+    },
+    "layer": [
+      "http://example.org/layer/translation"
+    ]
+  }
+]
