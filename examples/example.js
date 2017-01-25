@@ -21,6 +21,7 @@ function explore(options) {
     dataSource: annoSource,
     canvases: options.canvases,
     defaultCanvas: 'http://example.org/canvas/01/01',
+    defaultLayer: 'http://example.org/layer/transcription',
     onSelect: function(annotation) {
       jQuery('#output').text(JSON.stringify(annotation, null, 2));
     }

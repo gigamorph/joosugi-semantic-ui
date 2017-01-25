@@ -1,8 +1,8 @@
 import FacetSelector from './facet-selector';
 import AnnotationPanel from './annotation-panel';
 
-import importPackage from './import';
-const joosugi = importPackage('joosugi');
+//import importPackage from './import';
+//const joosugi = importPackage('joosugi');
 
 export default class AnnotationExplorerDialog {
   
@@ -17,6 +17,7 @@ export default class AnnotationExplorerDialog {
       dataSource: null,
       canvases: null, // canvas IDs or ranges
       defaultCanvas: null, // ID of default canvas to select
+      defaultLayer: null, // ID of default layer to select
       onSelect: null
     }, options);
     
@@ -52,16 +53,19 @@ export default class AnnotationExplorerDialog {
         console.log('hidden');
       }
     });
-    
+
     this.canvasSelector = this.setupCanvasSelector();
-    
+
     this.setupLayerSelector().then(function(selector) {
       _this.layerSelector = selector;
       if (_this.defaultCanvas) {
         _this.canvasSelector.setValue(_this.defaultCanvas);
       }
+      if (_this.defaultLayer) {
+        _this.layerSelector.setValue(_this.defaultLayer);
+      }
     });
-    
+
     this.setupActions();
   }
   
@@ -137,26 +141,6 @@ export default class AnnotationExplorerDialog {
     });
   }
 
-  reloadAnnotations() {
-    console.log('AnnotationExplorerDialog#reloadAnnotations');
-    const _this = this;
-    
-    this.annosPanel.empty();
-    
-    const canvasId = this.canvasSelector.value();
-    
-    let annotations = this.model.getAnnotations(canvasId);
-    
-    jQuery.each(annotations, function(index, annotation) {
-      if (annoUtil.isAnnoOnCanvas(annotation) &&
-        annotation.layerId === _this.currentLayerId)
-      {
-        const elem = _this.createAnnoElem(annotation);
-        _this.annosPanel.append(elem);
-      }
-    });
-  }
-  
   setDimensions() {
     const winHeight = jQuery(window).height();
     const rest = 180; // estimate height of dialog minus height of content div

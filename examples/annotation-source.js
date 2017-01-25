@@ -11,14 +11,17 @@ export default class AnnotationSource {
     });
   }
 
-  getAnnotations(canvasId) {
+  getAnnotations(options) {
+    const canvasId = options.canvasId;
+    const layerId = options.layerId;
+    
     return new Promise(function(resolve, reject) {
       jQuery.getJSON('/examples/data/annotations.json', function(data) {
         const annotations = [];
         for (let anno of data) {
           let targetCanvasIds = util.getTargetCanvasIds(anno, {deep: true, annotations: annotations});
           for (let targetCanvasId of targetCanvasIds) {
-            if (targetCanvasId === canvasId) {
+            if (targetCanvasId === canvasId && (!layerId || layerId === anno.layer[0])) {
               annotations.push(anno);
             }
           }

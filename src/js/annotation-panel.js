@@ -1,5 +1,7 @@
-import importPackage from './import';
-const util = importPackage('joosugi').annotationUtil;
+//import importPackage from './import';
+//const util = importPackage('joosugi').annotationUtil;
+
+const util = joosugi.annotationUtil;
 
 export default class AnnotationPanel {
   constructor(options) {
@@ -43,6 +45,8 @@ export default class AnnotationPanel {
   }
   
   reload(annotations) {
+    console.log('AnnotationPanel#reload');
+    console.log(annotations);
     this.elem.empty();
     for (let anno of annotations) {
       this.elem.append(this.createItem(anno));
