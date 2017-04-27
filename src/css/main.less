@@ -2,30 +2,30 @@
 
 #joosugi_anno_explorer_dialog {
   height: 80%;
-  
+
   .content {
     height: 72%;
     .grid {
       height: 100%;
     }
   }
-  
+
   .column.facets {
     height: 100%;
     overflow-y: scroll;
   }
-  
+
   .item.selected {
     background-color: orange;
   }
-  
+
   .item {
     padding: 5px;
     background-color: @light-gray;
     border-radius: 5px;
     margin: 2px;
   }
-  
+
   .ui.accordion .content {
     height: 120px;
     overflow-y: scroll;
@@ -38,4 +38,14 @@
   border: solid 1px @gray;
   border-radius: 5px;
   padding: 5px;
+  text-align: center;
+
+  .place-holder {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .item {
+    text-align: left;
+  }
 }

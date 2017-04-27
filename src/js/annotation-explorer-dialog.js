@@ -1,78 +1,73 @@
 import FacetSelector from './facet-selector';
 import AnnotationPanel from './annotation-panel';
 
-//import importPackage from './import';
-//const joosugi = importPackage('joosugi');
+let logger = null;
 
 export default class AnnotationExplorerDialog {
-  
+
   /**
    * @param {object} elem a jQuery element
    */
   constructor(options) {
-    const _this = this;
-    
-    jQuery.extend(this, {
+    this.options = Object.assign({
       appendTo: null,
-      dataSource: null,
-      canvases: null, // canvas IDs or ranges
-      defaultCanvas: null, // ID of default canvas to select
-      defaultLayer: null, // ID of default layer to select
-      onSelect: null
+      annotationExplorer: null,
+      canvases: [], // canvas IDs or ranges
+      defaultCanvasId: null, // ID of default canvas to select
+      layers: [],
+      defaultLayerId: null, // ID of default layer to select
+      onSelect: null,
+      logger: { debug: () => null, info: () => null, error: () => null }
     }, options);
-    
-    if (!this.model) {
-      this.model = new joosugi.AnnotationExplorer({
-        dataSource: this.dataSource
-      });
-    }
-    
+
+    logger = this.options.logger;
+    logger.debug('AnnotationExplorerDialog#constructor this.options:', this.options);
+
     this.id = 'joosugi_anno_explorer_dialog';
     this.elem = this.createElem(this.id);
     this.annosPanel = new AnnotationPanel({
       appendTo: this.elem.find('.column.annos'),
-      onChange: function(annotation) {
-        _this.selectedAnnotation = annotation;
-        _this.okButton.removeClass('disabled');
+      onChange: annotation => {
+        this.selectedAnnotation = annotation;
+        this.okButton.removeClass('disabled');
       }
     });
-    
+
     this.okButton = this.elem.find('.ok');
     this.cancelButton = this.elem.find('.cancel');
-    
+
     this.elem.modal({
       observeChanges: true,
-      onApprove: function(elem) {
-        console.log('approve');
-        _this.onSelect(_this.selectedAnnotation);
+      onApprove: elem => {
+        this.options.onSelect(this.selectedAnnotation);
       },
-      onDeny: function(elem) {
-        console.log('deny');
+      onDeny: elem => {
       },
-      onHidden: function(elem) {
-        console.log('hidden');
+      onHidden: elem => {
       }
     });
 
     this.canvasSelector = this.setupCanvasSelector();
+    this.layerSelector = this.setupLayerSelector();
 
-    this.setupLayerSelector().then(function(selector) {
-      _this.layerSelector = selector;
-      if (_this.defaultCanvas) {
-        _this.canvasSelector.setValue(_this.defaultCanvas);
-      }
-      if (_this.defaultLayer) {
-        _this.layerSelector.setValue(_this.defaultLayer);
-      }
-    });
+    const canvasId = this.options.defaultCanvasId || this.options.canvases[0]['@id'];
+    this.canvasSelector.setValue(canvasId);
+
+    setTimeout(() => {
+      this.canvasSelector.scrollToValue(canvasId);
+    }, 0);
+
+    const layerId = this.options.defaultLayerId || this.options.layers[0]['@id'];
+    this.layerSelector.setValue(layerId);
+    this.layerSelector.scrollToValue(layerId);
 
     this.setupActions();
   }
-  
+
   open() {
     this.elem.modal('show');
   }
-  
+
   createElem(id) {
     const oldElem = jQuery('#' + id);
     if (oldElem.length > 0) {
@@ -82,15 +77,14 @@ export default class AnnotationExplorerDialog {
       .addClass('ui modal')
       .attr('id', id)
       .html(template())
-      .appendTo(this.appendTo);
+      .appendTo(this.options.appendTo);
   }
-  
+
   setupCanvasSelector() {
-    const _this = this;
     const selector = new FacetSelector({
       appendTo: this.elem.find('#facets'),
       title: 'Canvas',
-      items: this.canvases,
+      items: this.options.canvases,
       parseItem: item => ({label: item['label'], value: item['@id']}),
       isLeaf: function(item) {
         return item['@type'] !== 'sc:Range';
@@ -99,53 +93,52 @@ export default class AnnotationExplorerDialog {
         return (item.canvases instanceof Array ? item.canvases : [])
           .concat(item.members instanceof Array ? item.members : []);
       },
-      onChange: function(selectedValue) {
-        console.log('canvas select: ' + selectedValue);
-        _this.refresh({
-          canvasId: selectedValue
-        });
-      }
+      onChange: selectedValue => {
+        logger.debug('AnnotationExplorerDialog canvas selected:', selectedValue);
+        this.refresh();
+      },
+      logger: logger
     });
     return selector;
   }
-  
+
   setupLayerSelector() {
-    const _this = this;
-    return this.model.getLayers().then(function(layers) {
-      return new FacetSelector({
-        appendTo: _this.elem.find('#facets'),
-        title: 'Layer',
-        items: layers,
-        parseItem: item => ({label: item.label, value: item['@id']}),
-        onChange: function(selectedValue) {
-          console.log('layer select: ' + selectedValue);
-          _this.refresh({
-            layerId: selectedValue
-          });
-        }
-      });
+    return new FacetSelector({
+      appendTo: this.elem.find('#facets'),
+      title: 'Layer',
+      items: this.options.layers,
+      parseItem: item => ({label: item.label, value: item['@id']}),
+      onChange: selectedValue => {
+        logger.debug('AnnotationExplorerDialog layer selected:', selectedValue);
+        this.refresh();
+      },
+      logger: logger
     });
   }
-  
-  refresh(options) {
-    console.log('AnnotationExplorerDialog#refresh');
-    const _this = this;
+
+  async refresh() {
     const canvasId = this.canvasSelector.value();
     const layerId = this.layerSelector.value();
-    
-    this.model.getAnnotations({
+    logger.debug('AnnotationExplorerDialog#refresh', canvasId, layerId);
+
+    if (!canvasId || !layerId) {
+      logger.debug('AnnotationExplorerDialog#refresh skipping...');
+      return;
+    }
+
+    this.annosPanel.showPlaceHolderText('Retrieving annotations...');
+    const annotations = await this.options.annotationExplorer.getAnnotations({
       canvasId: canvasId,
       layerId: layerId
-    }).then(function(annotations) {
-      _this.annosPanel.reload(annotations);
     });
+    this.annosPanel.reload(annotations);
   }
 
   setDimensions() {
     const winHeight = jQuery(window).height();
     const rest = 180; // estimate height of dialog minus height of content div
     const maxContentHeight =  (winHeight - rest) * 0.82;
-    
+
     this.elem.css('margin-top', -(winHeight * 0.45));
     this.contentGrid.css('height', maxContentHeight);
     this.canvasesPanel.css('height', maxContentHeight * 0.46);
@@ -156,28 +149,27 @@ export default class AnnotationExplorerDialog {
     const _this = this;
     const canvasElems = this.canvasesPanel.find('.canvas');
     let scrollTo = null;
-    
-    console.log('scrollToCurrentCanvas ' + canvasElems.length);
-    
+
+    logger.debug('AnnotationExplorerDialog scrollToCurrentCanvas', canvasElems.length);
+
     canvasElems.each(function(index, canvasElem) {
       const elem = $(canvasElem);
-      
+
       if (elem.data('canvasId') === _this.currentCanvasId) {
         scrollTo = elem;
         return false;
       }
     });
-    
+
     if (scrollTo) {
       this.canvasesPanel.scrollTop(scrollTo.position().top + this.canvasesPanel.scrollTop() - 18);
     }
   }
-  
+
   setupActions() {
     const _this = this;
     this.okButton.addClass('disabled');
     this.okButton.click(function() {
-      console.log('ok clicked');
     });
     this.cancelButton.click(function() {
       _this.elem.modal('hide');

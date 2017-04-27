@@ -2,20 +2,25 @@
 //const util = importPackage('joosugi').annotationUtil;
 
 const util = joosugi.annotationUtil;
+let logger = null;
 
 export default class AnnotationPanel {
   constructor(options) {
-    jQuery.extend(this, {
+    this.options = Object.assign({
       appendTo: null,
-      onChange: null
+      onChange: null,
+      logger: { debug: () => null, info: () => null, error: () => null }
     }, options);
 
+    logger = this.options.logger;
     this.elem = jQuery('<div/>')
       .addClass('joosugi_anno_panel')
       .html(template())
-      .appendTo(this.appendTo);
+      .appendTo(this.options.appendTo);
+    this.placeHolder = this.elem.find('.place-holder');
+    this.content = this.elem.find('.content');
   }
-  
+
   value() {
     return this._value;
   }
@@ -25,7 +30,7 @@ export default class AnnotationPanel {
       if (this._value !== value) {
         this._value = value;
         this.refresh();
-        this.onChange(value);
+        this.options.onChange(value);
       }
     } else {
       console.log('AnnotationPanel#setValue failed for value: ' + value);
@@ -33,7 +38,7 @@ export default class AnnotationPanel {
   }
 
   findItemByValue(value) {
-    for (let item of this.elem.find('.item')) {
+    for (let item of this.content.find('.item')) {
       console.log('00: ' + value['@id']);
       console.log('01: ' + jQuery(item).data('item')['@id']);
 
@@ -43,21 +48,32 @@ export default class AnnotationPanel {
     }
     return false;
   }
-  
+
+  showPlaceHolderText(text) {
+    this.placeHolder.text(text);
+    this.placeHolder.show();
+  }
+
+  hidePlaceHolderText() {
+    this.placeHolder.hide();
+  }
+
   reload(annotations) {
-    console.log('AnnotationPanel#reload');
-    console.log(annotations);
-    this.elem.empty();
+    logger.debug('AnnotationPanel#reload', annotations);
+    this.content.empty();
     for (let anno of annotations) {
-      this.elem.append(this.createItem(anno));
+      this.content.append(this.createItem(anno));
+    }
+    if (annotations.length > 0) {
+      this.hidePlaceHolderText();
+    } else {
+      this.showPlaceHolderText('No annotations found');
     }
   }
-  
+
   refresh() {
-    for (let item of this.elem.find('.item')) {
+    for (let item of this.content.find('.item')) {
       const $item = jQuery(item);
-      console.log('0: ' + this._value['@id']);
-      console.log('1: ' + $item.data('item')['@id']);
       if ($item.data('item')['@id'] === this._value['@id']) {
         $item.addClass('selected');
       } else {
@@ -65,7 +81,7 @@ export default class AnnotationPanel {
       }
     }
   }
-  
+
   createItem(annotation) {
     const _this = this;
     const elem = jQuery('<div/>')
@@ -80,5 +96,6 @@ export default class AnnotationPanel {
 }
 
 const template = Handlebars.compile([
-  '<div>{{{content}}}</div>'
+  '<span class="place-holder"></span>',
+  '<div class="content"></div>'
 ].join(''));

@@ -1,51 +1,57 @@
+let logger = null;
+
 export default class FacetSelector {
   constructor(options) {
-    jQuery.extend(this, {
+    this.options = Object.assign({
       appendTo: null,
       title: null,
       items: [],
-      
+
       // function that returns on object
       // { label: _LABEL_, value: _VALUE_ }
-      parseItem: null, 
-      
+      parseItem: null,
+
       isLeaf: () => true,
       getChildren: null,
-      onChange: () => {}
+      onChange: () => null,
+      logger: { debug: () => null, info: () => null, error: () => null }
     }, options);
-    
+
+    logger = this.options.logger;
+
     this.elem = jQuery('<div/>')
       .addClass('ui accordion')
       .html(template)
-      .appendTo(this.appendTo);
-    this.elem.find('.title').text(this.title);
-    
+      .appendTo(this.options.appendTo);
+    this.elem.find('.title').text(this.options.title);
+
     this.content = this.elem.find('.content');
-    
-    for (let item of this.items) {
+
+    for (let item of this.options.items) {
       this.addItem(item, this.content);
     }
     this.elem.accordion('open', 0);
-    
+
     this._value = null; // value of selected item
   }
-  
+
   value() {
     return this._value;
   }
-  
+
   setValue(value) {
+    logger.debug('FacetSelector#setValue', value);
     if (this.findItemByValue(value)) {
       if (this._value !== value) {
         this._value = value;
         this.refresh();
-        this.onChange(value);
+        this.options.onChange(value);
       }
     } else {
-      console.log('FacetSelector#setValue failed for value: ' + value);
+      logger.error('FacetSelector#setValue failed for value', value);
     }
   }
-  
+
   findItemByValue(value) {
     for (let item of this.content.find('.item')) {
       if (jQuery(item).data('item').value === value) {
@@ -54,7 +60,7 @@ export default class FacetSelector {
     }
     return false;
   }
-  
+
   refresh() {
     for (let item of this.content.find('.item')) {
       const $item = jQuery(item);
@@ -65,11 +71,11 @@ export default class FacetSelector {
       }
     }
   }
-  
+
   addLeaf(rawItem, appendTo) {
-    //console.log('FacetSelector#addLeaf item:', JSON.stringify(rawItem));
+    //logger.debugg('FacetSelector#addLeaf item:', rawItem);
     const _this = this;
-    const item = this.parseItem ? this.parseItem(rawItem) : rawItem;
+    const item = this.options.parseItem ? this.options.parseItem(rawItem) : rawItem;
     const elem = jQuery('<div/>')
       .addClass('item')
       .html(itemTemplate({label: item.label}));
@@ -83,14 +89,33 @@ export default class FacetSelector {
     });
     appendTo.append(elem);
   }
-  
+
   addItem(item, appendTo) {
-    if (this.isLeaf(item)) {
+    if (this.options.isLeaf(item)) {
       this.addLeaf(item, appendTo);
     } else {
-      for (let child of this.getChildren(item)) {
+      for (let child of this.options.getChildren(item)) {
         this.addItem(child, appendTo);
       }
+    }
+  }
+
+  scrollToValue(value) {
+    logger.debug('FacetSelector scrollToValue', value);
+    const items = this.content.find('.item');
+    let scrollTo = null;
+
+    for (let item of items) {
+      const elem = $(item);
+      if (elem.data('item').value === value) {
+        scrollTo = elem;
+        break;
+      }
+    }
+
+    if (scrollTo) {
+      console.log('SCROLL TO', scrollTo[0].outerHTML);
+      scrollTo[0].scrollIntoView();
     }
   }
 }
@@ -100,7 +125,7 @@ const template = Handlebars.compile([
   '<div class="content">',
   '</div>'
 ].join(''));
- 
+
  const itemTemplate = Handlebars.compile([
   '<a href="#">{{label}}</a>'
  ].join(''));
