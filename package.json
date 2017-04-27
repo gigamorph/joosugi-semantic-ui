@@ -5,7 +5,7 @@
   "scripts": {
     "start": "webpack-dev-server --config webpack.config.dev.js --hot --inline",
     "clean": "rm -rf dist/*",
-    "build": "npm run clean && webpack --config webpack.config.prod.js",
+    "build": "npm run clean && GIT_DESC=$(git describe --long --always) webpack --config webpack.config.prod.js",
     "test": "karma start --singleRun"
   },
   "repository": {
@@ -45,6 +45,7 @@
     "webpack-dev-server": "^2.4.5"
   },
   "dependencies": {
+    "babel-polyfill": "^6.23.0",
     "jquery": "^3.2.1",
     "joosugi": "^0.1.2"
   }
