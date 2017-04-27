@@ -1,38 +1,44 @@
-//var VersionFile = require('webpack-version-file-plugin');
-var BannerWebpackPlugin = require('banner-webpack-plugin');
 var path = require('path');
-var npmPackage = require('./package');
+const webpack = require('webpack');
 
 function header() {
-  return '// joosugi-semantic-ui DEV version ' + npmPackage.version + '\n// ' + 
-    'Build: ' + new Date() + '\n\n';
+  var gitDesc = process.env.GIT_DESC;
+  var text = 'joosugi-semantic-ui ' + gitDesc + ' built ' + new Date();
+  return '// ' + text + '\n\n';
 }
+process.traceDeprecation = true;
 
 module.exports = {
   output: {
-    path: './dist',
-    publicPath: '/dist/',
+    path: path.resolve(__dirname, 'dist'),
     filename: '[name].js'
   },
   module: {
-    loaders: [{
+    rules: [{
       test: /\.js$/,
-      loader: 'babel-loader',
-      query: {
-        presets: ['es2015', 'es2017']
-      }
+      use: [{
+        loader: 'babel-loader',
+        options: {
+          presets: ['es2015', 'es2017']
+        }
+      }]
     }, {
       test: /\.less$/,
-      loader: 'style-loader!css-loader!less-loader'
+      use: [{
+        loader: 'style-loader'
+      }, {
+        loader: 'css-loader'
+      }, {
+        loader: 'less-loader'
+      }]
     }]
   },
   plugins: [
-    new BannerWebpackPlugin({
-      chunks: {
-        'joosugi-semantic-ui': {
-          beforeContent: header()
-        }
-      }
+    new webpack.BannerPlugin({
+      banner: header(),
+      test: /\.js$/,
+      raw: true,
+      entryOnly: true
     })
   ]
 };

@@ -1,4 +1,4 @@
-require('exports?joosugi!../../node_modules/joosugi/dist/joosugi.js');
+require('exports-loader?joosugi!../../node_modules/joosugi/dist/joosugi.js');
 
 export default function importPackage(name) {
   switch (name) {
