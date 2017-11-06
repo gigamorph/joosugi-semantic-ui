@@ -1,4 +1,4 @@
-// joosugi-semantic-ui v0.1.1-2-g3fadf99 built Thu Apr 27 2017 14:21:06 GMT-0400 (EDT)
+// joosugi-semantic-ui v0.1.1-5-gaa52771 built Sun Nov 05 2017 22:46:26 GMT-0500 (EST)
 
 
 /******/ (function(modules) { // webpackBootstrap
@@ -2325,6 +2325,7 @@ var AnnotationExplorerDialog = function () {
 
     this.id = 'joosugi_anno_explorer_dialog';
     this.elem = this.createElem(this.id);
+
     this.annosPanel = new _annotationPanel2.default({
       appendTo: this.elem.find('.column.annos'),
       onChange: function onChange(annotation) {
@@ -2806,8 +2807,14 @@ var FacetSelector = function () {
       }
     }
 
-    this.elem.accordion('open', 0);
+    this.elem.accordion({
+      collapsible: false,
+      animateChildren: false,
+      duration: 0,
+      on: 'none'
+    });
 
+    this.elem.accordion('open', 0);
     this._value = null; // value of selected item
   }
 
@@ -2959,7 +2966,7 @@ var FacetSelector = function () {
         for (var _iterator5 = items[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
           var item = _step5.value;
 
-          var elem = $(item);
+          var elem = jQuery(item);
           if (elem.data('item').value === value) {
             scrollTo = elem;
             break;
