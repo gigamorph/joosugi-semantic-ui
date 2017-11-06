@@ -25,6 +25,7 @@ export default class AnnotationExplorerDialog {
 
     this.id = 'joosugi_anno_explorer_dialog';
     this.elem = this.createElem(this.id);
+
     this.annosPanel = new AnnotationPanel({
       appendTo: this.elem.find('.column.annos'),
       onChange: annotation => {

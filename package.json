@@ -47,6 +47,6 @@
   "dependencies": {
     "babel-polyfill": "^6.23.0",
     "jquery": "^3.2.1",
-    "joosugi": "^0.1.2"
+    "joosugi": "^0.3.2"
   }
 }

@@ -30,8 +30,15 @@ export default class FacetSelector {
     for (let item of this.options.items) {
       this.addItem(item, this.content);
     }
-    this.elem.accordion('open', 0);
 
+    this.elem.accordion({
+      collapsible	: false,
+      animateChildren: false,
+      duration: 0,
+      on: 'none'
+    });
+
+    this.elem.accordion('open', 0);
     this._value = null; // value of selected item
   }
 
@@ -106,7 +113,7 @@ export default class FacetSelector {
     let scrollTo = null;
 
     for (let item of items) {
-      const elem = $(item);
+      const elem = jQuery(item);
       if (elem.data('item').value === value) {
         scrollTo = elem;
         break;
