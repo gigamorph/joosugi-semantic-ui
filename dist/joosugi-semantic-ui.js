@@ -1,4 +1,4 @@
-// joosugi-semantic-ui v0.1.1-5-gaa52771 built Sun Nov 05 2017 22:46:26 GMT-0500 (EST)
+// joosugi-semantic-ui v0.1.2-0-g9b07d09 built Sun Nov 05 2017 22:47:26 GMT-0500 (EST)
 
 
 /******/ (function(modules) { // webpackBootstrap
